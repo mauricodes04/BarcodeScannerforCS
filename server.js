@@ -5,7 +5,7 @@ const XLSX = require('xlsx');
 
 const app = express();
 const PORT = 3000;
-const EXCEL_FILE = 'C:\\Users\\cutem\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\TEST_mauricio.xlsx';
+const EXCEL_FILE = 'C:\\Users\\cutem\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\TEST_mauricio.xlsx'; //workstation cloud directory
 
 app.use(express.json());
 
