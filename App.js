@@ -17,9 +17,23 @@ export default function App() {
     const result = await saveBarcode(barcode);
     
     if (result.success) {
+      let title = '';
+      let message = '';
+      
+      if (result.alreadyMarked) {
+        title = 'Already Verified';
+        message = `ASSET ID: ${barcode.data}\n\n${result.message}`;
+      } else if (result.found) {
+        title = 'Success - Found!';
+        message = `ASSET ID: ${barcode.data}\n\n✓ Found in inventory and marked with "F"`;
+      } else {
+        title = 'Not Found';
+        message = `ASSET ID: ${barcode.data}\n\n⚠ Not found in inventory\nAdded to "Other" sheet for review`;
+      }
+      
       Alert.alert(
-        'Success!',
-        `Barcode saved to database:\n${barcode.data}`,
+        title,
+        message,
         [
           {
             text: 'OK',
@@ -33,7 +47,7 @@ export default function App() {
         ]
       );
     } else {
-      Alert.alert('Error', `Failed to save barcode: ${result.error}`);
+      Alert.alert('Error', `Failed to process barcode: ${result.error}`);
     }
   };
 

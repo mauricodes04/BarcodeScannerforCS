@@ -1,11 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const XLSX = require('xlsx');
 
 const app = express();
 const PORT = 3000;
-const DATA_DIR = path.join(__dirname, 'data');
-const CSV_FILE = path.join(DATA_DIR, 'barcodes.csv');
+const EXCEL_FILE = 'C:\\Users\\mauri\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\TEST_mauricio.xlsx';
 
 // Middleware
 app.use(express.json());
@@ -18,96 +18,230 @@ app.use((req, res, next) => {
   next();
 });
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
-// Initialize CSV file with header if it doesn't exist
-if (!fs.existsSync(CSV_FILE)) {
-  fs.writeFileSync(CSV_FILE, 'barcode_data\n', 'utf8');
-}
-
-// Save barcode to CSV
+// Process barcode and update Excel file
 app.post('/api/barcode', (req, res) => {
+  console.log('\n=== NEW BARCODE REQUEST ===');
+  console.log('Timestamp:', new Date().toISOString());
   try {
     const { data } = req.body;
+    console.log('Received barcode data:', data);
     
     if (!data) {
+      console.log('ERROR: No barcode data provided');
       return res.status(400).json({ success: false, error: 'Barcode data is required' });
     }
 
-    // Append to CSV file
-    fs.appendFileSync(CSV_FILE, `${data}\n`, 'utf8');
+    // Check if Excel file exists
+    console.log('Checking Excel file exists at:', EXCEL_FILE);
+    if (!fs.existsSync(EXCEL_FILE)) {
+      console.log('ERROR: Excel file not found');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Excel file not found at specified location' 
+      });
+    }
+    console.log('Excel file found, proceeding to read...');
+
+    // Read the Excel file
+    console.log('Reading Excel workbook...');
+    const workbook = XLSX.readFile(EXCEL_FILE);
+    console.log('Workbook loaded. Available sheets:', workbook.SheetNames);
     
-    console.log(`Barcode saved: ${data}`);
-    res.json({ success: true, barcode: { data } });
+    // Get Sheet1 (main sheet)
+    const sheet1Name = 'Sheet1';
+    const otherSheetName = 'Other';
+    
+    if (!workbook.Sheets[sheet1Name]) {
+      console.log('ERROR: Sheet1 not found in workbook');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Sheet1 not found in Excel file' 
+      });
+    }
+
+    const sheet1 = workbook.Sheets[sheet1Name];
+    console.log('Converting Sheet1 to JSON...');
+    const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1, defval: '' });
+    console.log(`Sheet1 has ${sheet1Data.length} rows`);
+    
+    let found = false;
+    let rowIndex = -1;
+
+    // Search for ASSET ID in Column C (index 2)
+    console.log(`Searching for ASSET ID "${data}" in Column C...`);
+    for (let i = 0; i < sheet1Data.length; i++) {
+      const row = sheet1Data[i];
+      const cellValue = row[2]; // Column C (0-indexed)
+      
+      // Convert to string for comparison
+      if (cellValue !== undefined && cellValue !== null && String(cellValue).trim() === String(data).trim()) {
+        console.log(`Found match at row ${i + 1}`);
+        // Check if Column S (index 18) is empty
+        const columnS = row[18]; // Column S (0-indexed)
+        console.log(`Column S value at row ${i + 1}:`, columnS);
+        
+        if (!columnS || String(columnS).trim() === '') {
+          // Mark as Found in Column S
+          console.log(`Marking Column S with "F" at row ${i + 1}`);
+          const cellAddress = XLSX.utils.encode_cell({ r: i, c: 18 }); // Column S
+          sheet1[cellAddress] = { t: 's', v: 'F' };
+          found = true;
+          rowIndex = i + 1; // 1-indexed for display
+          break;
+        } else {
+          // Already marked
+          console.log(`Row ${i + 1} already marked with:`, columnS);
+          found = true;
+          rowIndex = i + 1;
+          console.log('Sending already marked response');
+          return res.json({ 
+            success: true, 
+            found: true,
+            alreadyMarked: true,
+            message: `ASSET ID ${data} already marked in row ${rowIndex}`,
+            barcode: { data }
+          });
+        }
+      }
+    }
+    console.log(`Search complete. Found: ${found}`);
+
+    if (found) {
+      // Save the updated workbook
+      console.log('Saving updated workbook...');
+      XLSX.writeFile(workbook, EXCEL_FILE);
+      console.log('Workbook saved successfully');
+      
+      console.log(`SUCCESS: ASSET ID ${data} found in Sheet1 row ${rowIndex} and marked with F`);
+      res.json({ 
+        success: true, 
+        found: true,
+        message: `ASSET ID ${data} found and marked with F in row ${rowIndex}`,
+        barcode: { data }
+      });
+      console.log('Response sent to client');
+    } else {
+      console.log('ASSET ID not found in Sheet1, adding to Other sheet...');
+      // Not found in Sheet1, add to Other sheet
+      let otherSheet = workbook.Sheets[otherSheetName];
+      
+      // Create Other sheet if it doesn't exist
+      if (!otherSheet) {
+        console.log('Other sheet does not exist, creating it...');
+        otherSheet = XLSX.utils.aoa_to_sheet([]);
+        workbook.Sheets[otherSheetName] = otherSheet;
+        workbook.SheetNames.push(otherSheetName);
+        console.log('Other sheet created');
+      } else {
+        console.log('Other sheet exists');
+      }
+      
+      const otherSheetData = XLSX.utils.sheet_to_json(otherSheet, { header: 1, defval: '' });
+      console.log(`Other sheet has ${otherSheetData.length} rows`);
+      
+      // Find the next empty row in Column A
+      let nextRow = otherSheetData.length;
+      console.log(`Adding ASSET ID to Other sheet at row ${nextRow + 1}`);
+      
+      // Append ASSET ID to Column A
+      const cellAddress = XLSX.utils.encode_cell({ r: nextRow, c: 0 }); // Column A
+      otherSheet[cellAddress] = { t: 's', v: data };
+      console.log(`Cell ${cellAddress} set to: ${data}`);
+      
+      // Update range
+      const range = XLSX.utils.decode_range(otherSheet['!ref'] || 'A1');
+      console.log('Current range:', otherSheet['!ref']);
+      if (nextRow > range.e.r) {
+        range.e.r = nextRow;
+      }
+      otherSheet['!ref'] = XLSX.utils.encode_range(range);
+      console.log('Updated range:', otherSheet['!ref']);
+      
+      // Save the updated workbook
+      console.log('Saving workbook with Other sheet update...');
+      XLSX.writeFile(workbook, EXCEL_FILE);
+      console.log('Workbook saved successfully');
+      
+      console.log(`SUCCESS: ASSET ID ${data} not found in Sheet1, added to Other sheet at row ${nextRow + 1}`);
+      res.json({ 
+        success: true, 
+        found: false,
+        message: `ASSET ID ${data} not found in inventory. Added to Other sheet.`,
+        barcode: { data }
+      });
+      console.log('Response sent to client');
+    }
+    
   } catch (error) {
-    console.error('Error saving barcode:', error);
+    console.error('\n!!! ERROR processing barcode !!!');
+    console.error('Error type:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ success: false, error: error.message });
+  } finally {
+    console.log('=== END BARCODE REQUEST ===\n');
   }
 });
 
-// Get all barcodes
+// Get all scanned barcodes from the "Other" sheet
 app.get('/api/barcodes', (req, res) => {
+  console.log('\n=== GET BARCODES REQUEST ===');
   try {
-    if (!fs.existsSync(CSV_FILE)) {
+    console.log('Checking Excel file exists...');
+    if (!fs.existsSync(EXCEL_FILE)) {
+      console.log('Excel file not found, returning empty array');
       return res.json([]);
     }
 
-    const csvContent = fs.readFileSync(CSV_FILE, 'utf8');
-    const lines = csvContent.split('\n').filter(line => line.trim() !== '' && line !== 'barcode_data');
-    const barcodes = lines.map(line => ({ data: line.trim() }));
+    console.log('Reading workbook...');
+    const workbook = XLSX.readFile(EXCEL_FILE);
+    const otherSheetName = 'Other';
     
-    res.json(barcodes);
-  } catch (error) {
-    console.error('Error reading barcodes:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Delete a specific barcode
-app.delete('/api/barcode', (req, res) => {
-  try {
-    const { data } = req.body;
-    
-    if (!data) {
-      return res.status(400).json({ success: false, error: 'Barcode data is required' });
+    if (!workbook.Sheets[otherSheetName]) {
+      console.log('Other sheet not found, returning empty array');
+      return res.json([]);
     }
 
-    const csvContent = fs.readFileSync(CSV_FILE, 'utf8');
-    const lines = csvContent.split('\n');
-    const filteredLines = lines.filter(line => line.trim() !== data);
+    console.log('Reading Other sheet...');
+    const otherSheet = workbook.Sheets[otherSheetName];
+    const otherSheetData = XLSX.utils.sheet_to_json(otherSheet, { header: 1, defval: '' });
+    console.log(`Other sheet has ${otherSheetData.length} rows`);
     
-    fs.writeFileSync(CSV_FILE, filteredLines.join('\n'), 'utf8');
+    // Extract all values from Column A
+    const barcodes = otherSheetData
+      .map(row => row[0]) // Column A
+      .filter(value => value && String(value).trim() !== '')
+      .map(data => ({ data: String(data).trim() }));
     
-    console.log(`Barcode deleted: ${data}`);
-    res.json({ success: true });
+    console.log(`Returning ${barcodes.length} barcodes`);
+    res.json(barcodes);
+    console.log('=== END GET BARCODES REQUEST ===\n');
   } catch (error) {
-    console.error('Error deleting barcode:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Clear all barcodes
-app.delete('/api/barcodes', (req, res) => {
-  try {
-    fs.writeFileSync(CSV_FILE, 'barcode_data\n', 'utf8');
-    
-    console.log('All barcodes cleared');
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error clearing barcodes:', error);
+    console.error('!!! ERROR reading barcodes !!!');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Barcode server is running' });
+  console.log('Health check request received');
+  const fileExists = fs.existsSync(EXCEL_FILE);
+  console.log('Excel file accessible:', fileExists);
+  res.json({ 
+    status: 'OK', 
+    message: 'Barcode server is running',
+    excelFileAccessible: fileExists
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`Barcode server running on http://localhost:${PORT}`);
-  console.log(`CSV file location: ${CSV_FILE}`);
+  console.log('\n' + '='.repeat(60));
+  console.log('BARCODE SERVER STARTED');
+  console.log('='.repeat(60));
+  console.log(`Server running on: http://localhost:${PORT}`);
+  console.log(`Excel file location: ${EXCEL_FILE}`);
+  console.log(`Excel file exists: ${fs.existsSync(EXCEL_FILE)}`);
+  console.log('='.repeat(60) + '\n');
 });
