@@ -1,73 +1,90 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// Server configuration
+// Update this IP address to your computer's local IP when testing on a physical device
+// For emulator/simulator, use localhost or 10.0.2.2 (Android) or localhost (iOS)
+const SERVER_URL = 'http://172.20.18.81:3000/api';
 
-const STORAGE_KEY = '@barcode_storage';
-
-// Save a barcode to local storage
+// Save a barcode to the server
 export const saveBarcode = async (barcodeData) => {
   try {
-    // Get existing barcodes
-    const existingData = await AsyncStorage.getItem(STORAGE_KEY);
-    const barcodes = existingData ? JSON.parse(existingData) : [];
+    const response = await fetch(`${SERVER_URL}/barcode`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data: barcodeData.data,
+      }),
+    });
+
+    const result = await response.json();
     
-    // Add new barcode with metadata
-    const newBarcode = {
-      ...barcodeData,
-      savedAt: new Date().toISOString(),
-      id: `${barcodeData.data}_${Date.now()}`,
-    };
-    
-    barcodes.push(newBarcode);
-    
-    // Save back to storage
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(barcodes));
-    
-    return { success: true, barcode: newBarcode };
+    if (result.success) {
+      return { 
+        success: true, 
+        barcode: {
+          ...barcodeData,
+          savedAt: new Date().toISOString(),
+          id: `${barcodeData.data}_${Date.now()}`,
+        }
+      };
+    } else {
+      return { success: false, error: result.error };
+    }
   } catch (error) {
     console.error('Error saving barcode:', error);
     return { success: false, error: error.message };
   }
 };
 
-// Get all saved barcodes
+// Get all saved barcodes from the server
 export const getAllBarcodes = async () => {
   try {
-    const data = await AsyncStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    const response = await fetch(`${SERVER_URL}/barcodes`);
+    const data = await response.json();
+    return data || [];
   } catch (error) {
     console.error('Error getting barcodes:', error);
     return [];
   }
 };
 
-// Delete a specific barcode
-export const deleteBarcode = async (barcodeId) => {
+// Delete a specific barcode from the server
+export const deleteBarcode = async (barcodeData) => {
   try {
-    const existingData = await AsyncStorage.getItem(STORAGE_KEY);
-    const barcodes = existingData ? JSON.parse(existingData) : [];
-    
-    const filteredBarcodes = barcodes.filter(b => b.id !== barcodeId);
-    
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(filteredBarcodes));
-    
-    return { success: true };
+    const response = await fetch(`${SERVER_URL}/barcode`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data: barcodeData,
+      }),
+    });
+
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error('Error deleting barcode:', error);
     return { success: false, error: error.message };
   }
 };
 
-// Clear all barcodes
+// Clear all barcodes from the server
 export const clearAllBarcodes = async () => {
   try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
-    return { success: true };
+    const response = await fetch(`${SERVER_URL}/barcodes`, {
+      method: 'DELETE',
+    });
+
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error('Error clearing barcodes:', error);
     return { success: false, error: error.message };
   }
 };
 
-// Check if a barcode already exists
+// Check if a barcode already exists on the server
 export const barcodeExists = async (barcodeData) => {
   try {
     const barcodes = await getAllBarcodes();

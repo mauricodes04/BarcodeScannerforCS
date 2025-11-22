@@ -7,6 +7,15 @@ export default function MultiBarcodeList({ barcodes, onSelectBarcode }) {
     return null;
   }
 
+  // Filter to show only unique barcodes based on barcode data
+  const uniqueBarcodes = barcodes.reduce((acc, current) => {
+    const exists = acc.find(item => item.data === current.data);
+    if (!exists) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+
   const renderBarcodeItem = ({ item, index }) => (
     <TouchableOpacity
       style={styles.barcodeItem}
@@ -28,11 +37,11 @@ export default function MultiBarcodeList({ barcodes, onSelectBarcode }) {
       <View style={styles.header}>
         <Ionicons name="barcode-outline" size={20} color="#fff" />
         <Text style={styles.headerText}>
-          {barcodes.length} Barcode{barcodes.length !== 1 ? 's' : ''} Detected
+          {uniqueBarcodes.length} Unique Barcode{uniqueBarcodes.length !== 1 ? 's' : ''} Detected
         </Text>
       </View>
       <FlatList
-        data={barcodes}
+        data={uniqueBarcodes}
         renderItem={renderBarcodeItem}
         keyExtractor={(item, index) => `${item.data}-${item.timestamp}-${index}`}
         style={styles.list}
