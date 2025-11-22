@@ -43,43 +43,44 @@ const STATUS_OPTIONS = [
 ];
 
 const LOCATIONS = [
-  { code: 'ALUM', name: 'Alumni Center' },
-  { code: 'ATEC', name: 'Advance Tooling Engineering Center' },
-  { code: 'CESS', name: 'Community Engagement & Student Success Building' },
-  { code: 'VABL', name: 'Visual Arts Building' },
-  { code: 'ESWOT', name: 'Social Work & Occupational Therapy' },
-  { code: 'EITTB', name: 'International Trade & Technology Building' },
-  { code: 'ECOXT', name: 'Orville Cox Tennis Center' },
-  { code: 'ETRAK', name: 'Track & Soccer Field' },
-  { code: 'EPACA', name: 'Performing Arts Complex A' },
-  { code: 'EPACB', name: 'Performing Arts Complex B' },
-  { code: 'EPACC', name: 'Performing Arts Complex C' },
-  { code: 'ESSBL', name: 'Executive Tower / Student Services Building / Visitors Center' },
-  { code: 'EMASS', name: 'Marialice Shary Shivers Building' },
-  { code: 'ESTAC', name: 'Student Academic Center' },
-  { code: 'EUCTR', name: 'University Center' },
-  { code: 'ECHAP', name: 'Chapel' },
-  { code: 'ESTUN', name: 'Student Union' },
-  { code: 'EDBCX', name: 'Dining & Ballroom Complex' },
-  { code: 'EHPE2', name: 'Health & Physical Education II' },
-  { code: 'EENGR', name: 'Engineering Building' },
-  { code: 'EACSB', name: 'Academic Services Building' },
-  { code: 'EPHYS', name: 'Physical Science Building' },
-  { code: 'EIMFD', name: 'Intramural Fields' },
-  { code: 'ETROX', name: 'Troxel Hall' },
-  { code: 'EHRTG', name: 'Heritage Hall' },
-  { code: 'EEDUC', name: 'Education Complex' },
-  { code: 'EMAGC', name: 'Mathematics & General Classrooms' },
-  { code: 'ECCTR', name: 'Computer Center' },
-  { code: 'ECOBE', name: 'Robert C. Vackar College of Business & Entrepreneurship' },
-  { code: 'ECULP', name: 'Central Utility Plant' },
-  { code: 'EHABE', name: 'Health Affairs Building East' },
-  { code: 'EBNSB', name: 'Behavioral Neurosciences Building' },
-  { code: 'EHABW', name: 'Health Affairs Building West' },
-  { code: 'ELABN', name: 'Liberal Arts Building North' },
-  { code: 'EUNTY', name: 'Unity Hall' },
-  { code: 'EPOB14', name: 'Physical Science Portable 14' },
-  { code: 'EIEAB', name: 'Interdisciplinary Engineering & Academic Building' },
+  { code: 'ALUM', name: 'Alumni Center', color: '#7B68EE' },
+  { code: 'ATEC', name: 'Advance Tooling Engineering Center', color: '#FF6B6B' },
+  { code: 'CESS', name: 'Community Engagement & Student Success Building', color: '#4ECDC4' },
+  { code: 'VABL', name: 'Visual Arts Building', color: '#FFB347' },
+  { code: 'ESWOT', name: 'Social Work & Occupational Therapy', color: '#95E1D3' },
+  { code: 'EITTB', name: 'International Trade & Technology Building', color: '#F38181' },
+  { code: 'ECOXT', name: 'Orville Cox Tennis Center', color: '#AA96DA' },
+  { code: 'ETRAK', name: 'Track & Soccer Field', color: '#FCBAD3' },
+  { code: 'EPACA', name: 'Performing Arts Complex A', color: '#A8D8EA' },
+  { code: 'EPACB', name: 'Performing Arts Complex B', color: '#FFD93D' },
+  { code: 'EPACC', name: 'Performing Arts Complex C', color: '#6BCB77' },
+  { code: 'ESSBL', name: 'Executive Tower / Student Services Building / Visitors Center', color: '#4D96FF' },
+  { code: 'EMASS', name: 'Marialice Shary Shivers Building', color: '#FF8CC8' },
+  { code: 'ESTAC', name: 'Student Academic Center', color: '#C4B5FD' },
+  { code: 'EUCTR', name: 'University Center', color: '#FCA5A5' },
+  { code: 'ECHAP', name: 'Chapel', color: '#86EFAC' },
+  { code: 'ESTUN', name: 'Student Union', color: '#93C5FD' },
+  { code: 'EDBCX', name: 'Dining & Ballroom Complex', color: '#FDA4AF' },
+  { code: 'EHPE2', name: 'Health & Physical Education II', color: '#FDE68A' },
+  { code: 'EENGR', name: 'Engineering Building', color: '#A7F3D0' },
+  { code: 'EACSB', name: 'Academic Services Building', color: '#BAE6FF' },
+  { code: 'EPHYS', name: 'Physical Science Building', color: '#DDD6FE' },
+  { code: 'EIMFD', name: 'Intramural Fields', color: '#FBCFE8' },
+  { code: 'ETROX', name: 'Troxel Hall', color: '#FED7AA' },
+  { code: 'EHRTG', name: 'Heritage Hall', color: '#BBF7D0' },
+  { code: 'EEDUC', name: 'Education Complex', color: '#BFDBFE' },
+  { code: 'EMAGC', name: 'Mathematics & General Classrooms', color: '#E9D5FF' },
+  { code: 'ECCTR', name: 'Computer Center', color: '#FECDD3' },
+  { code: 'ECOBE', name: 'Robert C. Vackar College of Business & Entrepreneurship', color: '#FEF08A' },
+  { code: 'ECULP', name: 'Central Utility Plant', color: '#99F6E4' },
+  { code: 'EHABE', name: 'Health Affairs Building East', color: '#A5F3FC' },
+  { code: 'EBNSB', name: 'Behavioral Neurosciences Building', color: '#DDD6FE' },
+  { code: 'EHABW', name: 'Health Affairs Building West', color: '#FBCFE8' },
+  { code: 'ELABN', name: 'Liberal Arts Building North', color: '#FED7AA' },
+  { code: 'EUNTY', name: 'Unity Hall', color: '#BBF7D0' },
+  { code: 'EPOB14', name: 'Physical Science Portable 14', color: '#BAE6FF' },
+  { code: 'EIEAB', name: 'Interdisciplinary Engineering & Academic Building', color: '#C084FC' },
+  { code: 'AWAY', name: 'Away From Campus', color: '#FF6B9D' },
 ];
 
 export default function StatusSelectionModal({ visible, onClose, onSubmit, barcodeData }) {
@@ -161,7 +162,7 @@ export default function StatusSelectionModal({ visible, onClose, onSubmit, barco
           <View style={styles.header}>
             {step > 1 ? (
               <TouchableOpacity onPress={handleBack} style={styles.navButton}>
-                <Ionicons name="arrow-back" size={22} color="#e8eef5" />
+                <Ionicons name="arrow-back" size={22} color="#d0d0d0" />
               </TouchableOpacity>
             ) : (
               <View style={styles.navButtonPlaceholder} />
@@ -172,13 +173,13 @@ export default function StatusSelectionModal({ visible, onClose, onSubmit, barco
               {step === 3 && 'Room Number'}
             </Text>
             <TouchableOpacity onPress={onClose} style={styles.navButton}>
-              <Ionicons name="close" size={22} color="#e8eef5" />
+              <Ionicons name="close" size={22} color="#d0d0d0" />
             </TouchableOpacity>
           </View>
 
           <ScrollView
             style={styles.content}
-            contentContainerStyle={styles.contentContainer}
+            contentContainerStyle={[styles.contentContainer, step !== 3 && styles.contentContainerCompact]}
             showsVerticalScrollIndicator={false}
             bounces={false}
           >
@@ -215,12 +216,13 @@ export default function StatusSelectionModal({ visible, onClose, onSubmit, barco
                         key={loc.code}
                         label={`${loc.code} - ${loc.name}`}
                         value={loc.code}
+                        color="#ffffff"
                       />
                     ))}
                   </Picker>
                 </View>
-                <View style={styles.locationSummary}>
-                  <Ionicons name="location-outline" size={20} color="#4A90E2" />
+                <View style={[styles.locationSummary, { backgroundColor: LOCATIONS.find(loc => loc.code === location)?.color || '#383838' }]}>
+                  <Ionicons name="location-outline" size={20} color="#fff" />
                   <View style={styles.locationSummaryText}>
                     <Text style={styles.locationCode}>{location}</Text>
                     <Text style={styles.locationName}>
@@ -303,12 +305,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#1a2332',
+    backgroundColor: '#2a2a2a',
     borderRadius: 20,
     width: width * 0.9,
     height: '80%',
     borderWidth: 3,
-    borderColor: '#2d3e50',
+    borderColor: '#404040',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
@@ -322,7 +324,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderBottomWidth: 3,
-    borderBottomColor: '#2d3e50',
+    borderBottomColor: '#404040',
   },
   navButton: {
     padding: 6,
@@ -331,7 +333,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 18,
-    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+    backgroundColor: 'rgba(180, 180, 180, 0.15)',
   },
   navButtonPlaceholder: {
     width: 36,
@@ -340,7 +342,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#e8eef5',
+    color: '#e0e0e0',
     flex: 1,
     textAlign: 'center',
   },
@@ -387,6 +389,9 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     flexGrow: 1,
   },
+  contentContainerCompact: {
+    paddingBottom: 12,
+  },
   barcodeCard: {
     marginHorizontal: 20,
     marginBottom: 16,
@@ -422,17 +427,16 @@ const styles = StyleSheet.create({
   statusButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    minHeight: 400,
+    justifyContent: 'center',
+    gap: 15,
+    paddingVertical: 20,
   },
   statusButton: {
-    width: '48%',
-    aspectRatio: 0.9,
+    width: '45%',
+    aspectRatio: 0.95,
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
     borderWidth: 3,
     borderColor: 'rgba(255, 255, 255, 0.15)',
     shadowColor: '#000',
@@ -471,28 +475,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   locationContainer: {
-    paddingVertical: 20,
+    paddingVertical: 10,
   },
   pickerContainer: {
-    backgroundColor: '#2d3e50',
+    backgroundColor: '#383838',
     borderRadius: 12,
     borderWidth: 3,
-    borderColor: '#3d4e60',
+    borderColor: '#505050',
     marginBottom: 20,
     overflow: 'hidden',
   },
   picker: {
     height: 200,
+    color: '#e0e0e0',
   },
   locationSummary: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2d3e50',
     borderRadius: 12,
     padding: 14,
     marginBottom: 18,
     borderWidth: 3,
-    borderColor: '#3d4e60',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   locationSummaryText: {
     marginLeft: 12,
@@ -501,22 +505,28 @@ const styles = StyleSheet.create({
   locationCode: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#e8eef5',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   locationName: {
     fontSize: 13,
-    color: '#a8b4c5',
+    color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 5,
   },
   continueButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#606060',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 15,
     borderRadius: 12,
     borderWidth: 3,
-    borderColor: '#5a9ff2',
+    borderColor: '#707070',
     gap: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -530,38 +540,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   roomContainer: {
-    paddingVertical: 20,
-    paddingBottom: 30,
+    paddingVertical: 10,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#e8eef5',
+    color: '#e0e0e0',
     marginBottom: 10,
   },
   input: {
-    backgroundColor: '#2d3e50',
+    backgroundColor: '#383838',
     borderWidth: 3,
-    borderColor: '#3d4e60',
+    borderColor: '#505050',
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
     marginBottom: 20,
-    color: '#e8eef5',
+    color: '#e0e0e0',
   },
   summaryCard: {
-    backgroundColor: '#2d3e50',
+    backgroundColor: '#383838',
     borderRadius: 12,
     borderWidth: 3,
-    borderColor: '#3d4e60',
+    borderColor: '#505050',
     padding: 15,
     marginBottom: 20,
   },
   summaryTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#e8eef5',
+    color: '#e0e0e0',
     marginBottom: 10,
   },
   summaryRow: {
@@ -572,12 +581,12 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#a8b4c5',
+    color: '#b0b0b0',
     fontWeight: '500',
   },
   summaryValue: {
     fontSize: 14,
-    color: '#e8eef5',
+    color: '#e0e0e0',
     fontWeight: '600',
   },
   summaryBadge: {

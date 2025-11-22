@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Alert, Vibration } from 'react-native';
 import BarcodeScanner from './components/BarcodeScanner';
-import MultiBarcodeList from './components/MultiBarcodeList';
 import StatusSelectionModal from './components/StatusSelectionModal';
 import { saveBarcode } from './services/database';
 
@@ -79,10 +78,6 @@ export default function App() {
       <BarcodeScanner 
         onBarcodeScanned={handleBarcodeScanned}
         scannedBarcodes={scannedBarcodes}
-      />
-      <MultiBarcodeList 
-        barcodes={scannedBarcodes}
-        onSelectBarcode={handleSelectBarcode}
       />
       <StatusSelectionModal
         visible={modalVisible}

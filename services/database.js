@@ -1,6 +1,4 @@
-// Server configuration
-// Update this IP address to your computer's local IP when testing on a physical device
-// For emulator/simulator, use localhost or 10.0.2.2 (Android) or localhost (iOS)
+
 const SERVER_URL = 'http://172.20.18.81:3000/api';
 
 // Save a barcode to the server
