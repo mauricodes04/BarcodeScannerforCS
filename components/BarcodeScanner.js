@@ -79,46 +79,46 @@ export default function BarcodeScanner({ onBarcodeScanned, scannedBarcodes }) {
           ],
         }}
         enableTorch={torchOn}
-      >
-        {/* Viewfinder Overlay */}
-        <View style={styles.overlay}>
-          <View style={styles.unfocusedContainer}>
-            <View style={styles.topOverlay} />
+      />
+      
+      {/* Viewfinder Overlay */}
+      <View style={styles.overlay}>
+        <View style={styles.unfocusedContainer}>
+          <View style={styles.topOverlay} />
+        </View>
+        
+        <View style={styles.middleContainer}>
+          <View style={styles.sideOverlay} />
+          <View style={styles.focusedContainer}>
+            {/* Corner indicators */}
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
           </View>
-          
-          <View style={styles.middleContainer}>
-            <View style={styles.sideOverlay} />
-            <View style={styles.focusedContainer}>
-              {/* Corner indicators */}
-              <View style={[styles.corner, styles.topLeft]} />
-              <View style={[styles.corner, styles.topRight]} />
-              <View style={[styles.corner, styles.bottomLeft]} />
-              <View style={[styles.corner, styles.bottomRight]} />
-            </View>
-            <View style={styles.sideOverlay} />
-          </View>
-
-          <View style={styles.unfocusedContainer}>
-            <View style={styles.bottomOverlay}>
-              <Text style={styles.instructionText}>
-                Position barcode within the frame
-              </Text>
-            </View>
-          </View>
+          <View style={styles.sideOverlay} />
         </View>
 
-        {/* Torch Toggle Button */}
-        <TouchableOpacity
-          style={styles.torchButton}
-          onPress={toggleTorch}
-        >
-          <Ionicons
-            name={torchOn ? 'flash' : 'flash-off'}
-            size={28}
-            color="#fff"
-          />
-        </TouchableOpacity>
-      </CameraView>
+        <View style={styles.unfocusedContainer}>
+          <View style={styles.bottomOverlay}>
+            <Text style={styles.instructionText}>
+              Position barcode within the frame
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Torch Toggle Button */}
+      <TouchableOpacity
+        style={styles.torchButton}
+        onPress={toggleTorch}
+      >
+        <Ionicons
+          name={torchOn ? 'flash' : 'flash-off'}
+          size={28}
+          color="#fff"
+        />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -153,6 +153,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     flex: 1,
     backgroundColor: 'transparent',
   },
