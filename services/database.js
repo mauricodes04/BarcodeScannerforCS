@@ -1,6 +1,28 @@
 
 const SERVER_URL = 'http://172.20.18.81:3000/api';
 
+// Lookup barcode to get asset information
+export const lookupBarcode = async (barcodeData) => {
+  try {
+    const response = await fetch(`${SERVER_URL}/barcode/lookup/${encodeURIComponent(barcodeData)}`);
+    const result = await response.json();
+    
+    if (result.success) {
+      return {
+        success: true,
+        found: result.found,
+        assetDescription: result.assetDescription,
+        assetId: result.assetId,
+        isMarked: result.isMarked
+      };
+    } else {
+      return { success: false, error: result.error };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
 // Save a barcode to the server
 export const saveBarcode = async (barcodeData) => {
   try {

@@ -3,17 +3,36 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, Alert, Vibration } from 'react-native';
 import BarcodeScanner from './components/BarcodeScanner';
 import StatusSelectionModal from './components/StatusSelectionModal';
-import { saveBarcode } from './services/database';
+import { saveBarcode, lookupBarcode } from './services/database';
 
 export default function App() {
   const [scannedBarcodes, setScannedBarcodes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedBarcode, setSelectedBarcode] = useState(null);
+  const [assetInfo, setAssetInfo] = useState(null);
 
-  const handleBarcodeScanned = (barcodeData) => {
+  const handleBarcodeScanned = async (barcodeData) => {
     Vibration.vibrate(100);
     setScannedBarcodes(prev => [...prev, barcodeData]);
     setSelectedBarcode(barcodeData);
+    
+    // Lookup barcode to get asset description
+    const lookupResult = await lookupBarcode(barcodeData.data);
+    
+    if (lookupResult.success) {
+      setAssetInfo({
+        assetDescription: lookupResult.assetDescription,
+        assetId: lookupResult.assetId,
+        found: lookupResult.found
+      });
+    } else {
+      setAssetInfo({
+        assetDescription: null,
+        assetId: barcodeData.data,
+        found: false
+      });
+    }
+    
     setModalVisible(true);
   };
 
@@ -84,6 +103,7 @@ export default function App() {
         onClose={() => setModalVisible(false)}
         onSubmit={handleModalSubmit}
         barcodeData={selectedBarcode}
+        assetInfo={assetInfo}
       />
     </View>
   );

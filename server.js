@@ -223,6 +223,79 @@ app.get('/api/barcodes', (req, res) => {
   }
 });
 
+// Lookup barcode without modifying the file
+app.get('/api/barcode/lookup/:barcode', (req, res) => {
+  try {
+    const { barcode } = req.params;
+    
+    if (!barcode) {
+      return res.status(400).json({ success: false, error: 'Barcode is required' });
+    }
+
+    if (!fs.existsSync(EXCEL_FILE)) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Excel file not found at specified location' 
+      });
+    }
+
+    const workbook = XLSX.readFile(EXCEL_FILE);
+    const sheet1Name = 'Sheet1';
+    
+    if (!workbook.Sheets[sheet1Name]) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Sheet1 not found in Excel file' 
+      });
+    }
+
+    const sheet1 = workbook.Sheets[sheet1Name];
+    const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1, defval: '' });
+    
+    // Search for ASSET ID in Columns C, D, and E (index 2, 3, 4)
+    for (let i = 0; i < sheet1Data.length; i++) {
+      const row = sheet1Data[i];
+      const cellValueC = row[2];
+      const cellValueD = row[3];
+      const cellValueE = row[4];
+      
+      const matchC = cellValueC !== undefined && cellValueC !== null && String(cellValueC).trim() === String(barcode).trim();
+      const matchD = cellValueD !== undefined && cellValueD !== null && String(cellValueD).trim() === String(barcode).trim();
+      const matchE = cellValueE !== undefined && cellValueE !== null && String(cellValueE).trim() === String(barcode).trim();
+      
+      if (matchC || matchD || matchE) {
+        // Get Column G value (Asset Description) - index 6
+        const columnG = row[6];
+        const assetDescription = columnG ? String(columnG).trim() : '';
+        
+        // Check if already marked (Column S - index 18)
+        const columnS = row[18];
+        const isMarked = columnS && String(columnS).trim() !== '';
+        
+        return res.json({ 
+          success: true, 
+          found: true,
+          assetDescription: assetDescription,
+          assetId: barcode,
+          isMarked: isMarked
+        });
+      }
+    }
+
+    // Not found in inventory
+    res.json({ 
+      success: true, 
+      found: false,
+      assetDescription: null,
+      assetId: barcode,
+      isMarked: false
+    });
+    
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   const fileExists = fs.existsSync(EXCEL_FILE);

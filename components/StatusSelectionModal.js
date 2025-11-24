@@ -83,7 +83,7 @@ const LOCATIONS = [
   { code: 'AWAY', name: 'Away From Campus', color: '#FF6B9D' },
 ];
 
-export default function StatusSelectionModal({ visible, onClose, onSubmit, barcodeData }) {
+export default function StatusSelectionModal({ visible, onClose, onSubmit, barcodeData, assetInfo }) {
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState('');
   const [location, setLocation] = useState('EIEAB');
@@ -291,6 +291,23 @@ export default function StatusSelectionModal({ visible, onClose, onSubmit, barco
               </View>
             )}
           </ScrollView>
+          
+          {assetInfo && (
+            <View style={styles.assetInfoFooter}>
+              <View style={styles.assetInfoRow}>
+                <Text style={styles.assetInfoLabel}>Asset Description:</Text>
+                <Text style={styles.assetInfoValue} numberOfLines={2}>
+                  {assetInfo.assetDescription || 'N/A'}
+                </Text>
+              </View>
+              <View style={styles.assetInfoRow}>
+                <Text style={styles.assetInfoLabel}>Asset ID:</Text>
+                <Text style={styles.assetInfoValue}>
+                  {assetInfo.assetId || 'N/A'}
+                </Text>
+              </View>
+            </View>
+          )}
         </Animated.View>
       </View>
     </Modal>
@@ -628,5 +645,28 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
+  },
+  assetInfoFooter: {
+    backgroundColor: '#1f1f1f',
+    borderTopWidth: 3,
+    borderTopColor: '#404040',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  assetInfoRow: {
+    marginBottom: 8,
+  },
+  assetInfoLabel: {
+    fontSize: 12,
+    color: '#9e9e9e',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  assetInfoValue: {
+    fontSize: 15,
+    color: '#e0e0e0',
+    fontWeight: '600',
   },
 });
