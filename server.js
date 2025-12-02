@@ -225,14 +225,18 @@ app.get('/api/barcodes', (req, res) => {
 
 // Lookup barcode without modifying the file
 app.get('/api/barcode/lookup/:barcode', (req, res) => {
+  console.log('\n📡 Lookup request received');
   try {
     const { barcode } = req.params;
+    console.log('Barcode to lookup:', barcode);
     
     if (!barcode) {
+      console.error('❌ No barcode provided');
       return res.status(400).json({ success: false, error: 'Barcode is required' });
     }
 
     if (!fs.existsSync(EXCEL_FILE)) {
+      console.error('❌ Excel file not found');
       return res.status(500).json({ 
         success: false, 
         error: 'Excel file not found at specified location' 
@@ -243,6 +247,7 @@ app.get('/api/barcode/lookup/:barcode', (req, res) => {
     const sheet1Name = 'Sheet1';
     
     if (!workbook.Sheets[sheet1Name]) {
+      console.error('❌ Sheet1 not found');
       return res.status(500).json({ 
         success: false, 
         error: 'Sheet1 not found in Excel file' 
@@ -272,6 +277,9 @@ app.get('/api/barcode/lookup/:barcode', (req, res) => {
         const columnS = row[18];
         const isMarked = columnS && String(columnS).trim() !== '';
         
+        console.log('✅ Barcode found in inventory');
+        console.log('Asset Description:', assetDescription);
+        
         return res.json({ 
           success: true, 
           found: true,
@@ -283,6 +291,7 @@ app.get('/api/barcode/lookup/:barcode', (req, res) => {
     }
 
     // Not found in inventory
+    console.log('⚠️ Barcode not found in inventory');
     res.json({ 
       success: true, 
       found: false,
@@ -292,6 +301,7 @@ app.get('/api/barcode/lookup/:barcode', (req, res) => {
     });
     
   } catch (error) {
+    console.error('❌ Lookup error:', error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -13,3 +13,11 @@ Scan barcodes → Select status → Choose building → Enter room → Submit. D
   <img src="assets/4.png" width="200" alt="Room Entry" />
   <img src="assets/5.png" width="200" alt="Success Alert" />
 </div>
+
+## Setup
+
+Each command on seperate terminals
+npm run server
+ngrok http 3000
+# Update database.js with url provided by ngrok
+npx expo start --tunnel

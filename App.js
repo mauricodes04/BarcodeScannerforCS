@@ -17,7 +17,9 @@ export default function App() {
     setSelectedBarcode(barcodeData);
     
     // Lookup barcode to get asset description
+    console.log('Starting barcode lookup for:', barcodeData.data);
     const lookupResult = await lookupBarcode(barcodeData.data);
+    console.log('Lookup completed:', lookupResult);
     
     if (lookupResult.success) {
       setAssetInfo({
@@ -26,11 +28,26 @@ export default function App() {
         found: lookupResult.found
       });
     } else {
-      setAssetInfo({
-        assetDescription: null,
-        assetId: barcodeData.data,
-        found: false
-      });
+      console.error('Lookup failed, using fallback:', lookupResult.error);
+      Alert.alert(
+        '⚠️ Connection Issue',
+        `Could not connect to server.\n\nError: ${lookupResult.error}\n\nPlease check:\n1. Server is running (npm run server)\n2. IP address is correct in database.js\n3. Same WiFi network`,
+        [
+          {
+            text: 'Continue Anyway',
+            onPress: () => {
+              setAssetInfo({
+                assetDescription: null,
+                assetId: barcodeData.data,
+                found: false
+              });
+              setModalVisible(true);
+            }
+          },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+      return;
     }
     
     setModalVisible(true);
