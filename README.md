@@ -16,8 +16,11 @@ Scan barcodes → Select status → Choose building → Enter room → Submit. D
 
 ## Setup
 
-Each command on seperate terminals
+Each command on separate terminals:
+
+```bash
 npm run server
 ngrok http 3000
-Update database.js with url provided by ngrok
+# Update database.js with URL provided by ngrok (add /api at the end)
 npx expo start --tunnel
+```
