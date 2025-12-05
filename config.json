@@ -1,0 +1,30 @@
+{
+  "excel": {
+    "filePath": "C:\\Users\\cutem\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\DEMO.xlsx",
+    "sheets": {
+      "inventory": "Sheet1",
+      "other": "Other"
+    },
+    "columns": {
+      "assetIdSearch": [
+        2,
+        3,
+        4
+      ],
+      "assetName": 5,
+      "assetDescription": 6,
+      "status": 15,
+      "location": 16,
+      "room": 17,
+      "markedCheck": 18
+    },
+    "counting": {
+      "startRow": 6,
+      "endRow": 357,
+      "totalCount": 352
+    }
+  },
+  "server": {
+    "ngrokUrl": "https://emilia-arteriovenous-tori.ngrok-free.dev/api"
+  }
+}
