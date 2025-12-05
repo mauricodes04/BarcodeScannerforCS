@@ -3,9 +3,45 @@ const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
 
+// ============================================================================
+// CONFIGURATION LOADER
+// ============================================================================
+let config;
+try {
+  const configData = fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8');
+  config = JSON.parse(configData);
+  console.log('✅ Configuration loaded from config.json');
+} catch (error) {
+  console.error('\n' + '='.repeat(60));
+  console.error('❌ FATAL ERROR: config.json not found or invalid.');
+  console.error('='.repeat(60));
+  console.error('\nRun: python config_window.py');
+  console.error('\nTo create the configuration file.\n');
+  console.error('Error details:', error.message);
+  console.error('='.repeat(60) + '\n');
+  process.exit(1);
+}
+
+// Extract configuration constants
+const EXCEL_FILE = config.excel.filePath;
+const INVENTORY_SHEET = config.excel.sheets.inventory;
+const OTHER_SHEET = config.excel.sheets.other;
+const ASSET_ID_COLS = config.excel.columns.assetIdSearch.filter(x => x !== null && x !== undefined);
+const ASSET_NAME_COL = config.excel.columns.assetName;
+const ASSET_DESC_COL = config.excel.columns.assetDescription;
+const STATUS_COL = config.excel.columns.status;
+const LOCATION_COL = config.excel.columns.location;
+const ROOM_COL = config.excel.columns.room;
+const MARKED_CHECK_COL = config.excel.columns.markedCheck;
+const COUNT_START_ROW = config.excel.counting.startRow;
+const COUNT_END_ROW = config.excel.counting.endRow;
+const TOTAL_COUNT = config.excel.counting.totalCount;
+
+// ============================================================================
+// EXPRESS SERVER SETUP
+// ============================================================================
 const app = express();
 const PORT = 3000;
-const EXCEL_FILE = 'C:\\Users\\cutem\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\DEMO.xlsx'; //workstation cloud directory
 
 app.use(express.json());
 
@@ -34,8 +70,8 @@ app.post('/api/barcode', (req, res) => {
     }
 
     const workbook = XLSX.readFile(EXCEL_FILE);
-    const sheet1Name = 'Sheet1';
-    const otherSheetName = 'Other';
+    const sheet1Name = INVENTORY_SHEET;
+    const otherSheetName = OTHER_SHEET;
     
     if (!workbook.Sheets[sheet1Name]) {
       return res.status(500).json({ 
@@ -49,55 +85,57 @@ app.post('/api/barcode', (req, res) => {
     
     let found = false;
 
-    // Search for ASSET ID in Columns C, D, and E (index 2, 3, 4)
+    // Search for ASSET ID in configured columns
     for (let i = 0; i < sheet1Data.length; i++) {
       const row = sheet1Data[i];
-      const cellValueC = row[2];
-      const cellValueD = row[3];
-      const cellValueE = row[4];
       
-      const matchC = cellValueC !== undefined && cellValueC !== null && String(cellValueC).trim() === String(data).trim();
-      const matchD = cellValueD !== undefined && cellValueD !== null && String(cellValueD).trim() === String(data).trim();
-      const matchE = cellValueE !== undefined && cellValueE !== null && String(cellValueE).trim() === String(data).trim();
+      // Check all configured Asset ID columns
+      let assetFound = false;
+      for (const colIdx of ASSET_ID_COLS) {
+        const cellValue = row[colIdx];
+        const match = cellValue !== undefined && cellValue !== null && String(cellValue).trim() === String(data).trim();
+        if (match) {
+          assetFound = true;
+          break;
+        }
+      }
       
-      if (matchC || matchD || matchE) {
-        // Get Column F value (L) - index 5
-        const columnG = row[5];
-        const lValue = columnG ? String(columnG).trim() : '';
+      if (assetFound) {
+        // Get Asset Name value from configured column
+        const assetNameValue = row[ASSET_NAME_COL];
+        const lValue = assetNameValue ? String(assetNameValue).trim() : '';
         
-        // Check if Column p (index 15) is empty
-        const columnS = row[15];
+        // Check if Status column is empty
+        const statusValue = row[STATUS_COL];
         
-        if (!columnS || String(columnS).trim() === '') {
-          // Mark status in Column p
-          const cellAddressS = XLSX.utils.encode_cell({ r: i, c: 15 }); // Column p
+        if (!statusValue || String(statusValue).trim() === '') {
+          // Mark status in configured column
+          const cellAddressS = XLSX.utils.encode_cell({ r: i, c: STATUS_COL });
           sheet1[cellAddressS] = { t: 's', v: status || 'F' };
           
-          // Write location abbreviation to Column T (index 19)
+          // Write location to configured column
           if (location) {
-            const cellAddressT = XLSX.utils.encode_cell({ r: i, c: 16 }); // Column T
+            const cellAddressT = XLSX.utils.encode_cell({ r: i, c: LOCATION_COL });
             sheet1[cellAddressT] = { t: 's', v: location };
           }
           
-          // Write room number to Column U (index 20)
+          // Write room number to configured column
           if (room) {
-            const cellAddressU = XLSX.utils.encode_cell({ r: i, c: 17 }); // Column U
+            const cellAddressU = XLSX.utils.encode_cell({ r: i, c: ROOM_COL });
             sheet1[cellAddressU] = { t: 's', v: room };
           }
           
           found = true;
           
-          // Count marked items in Column S (rows 6-357, indices 5-356)
+          // Count marked items in configured column and row range
           // Count AFTER marking to include current item
           let markedCount = 0;
-          for (let j = 5; j <= 356; j++) {
-            const sValue = sheet1Data[j] ? sheet1Data[j][18] : null;
-            if (sValue && String(sValue).trim() !== '') {
+          for (let j = COUNT_START_ROW - 1; j <= COUNT_END_ROW - 1; j++) {
+            const markedValue = sheet1Data[j] ? sheet1Data[j][MARKED_CHECK_COL] : null;
+            if (markedValue && String(markedValue).trim() !== '') {
               markedCount++;
             }
           }
-          // Add 1 for the current item we just marked
-          markedCount++;
           
           XLSX.writeFile(workbook, EXCEL_FILE);
           
@@ -106,8 +144,8 @@ app.post('/api/barcode', (req, res) => {
             found: true,
             lValue: lValue,
             markedCount: markedCount,
-            totalCount: 258,
-            message: `${lValue} Found! ${markedCount}/258`,
+            totalCount: TOTAL_COUNT,
+            message: `${lValue} Found! ${markedCount}/${TOTAL_COUNT}`,
             barcode: { data }
           });
         } else {
@@ -203,7 +241,7 @@ app.get('/api/barcodes', (req, res) => {
     }
 
     const workbook = XLSX.readFile(EXCEL_FILE);
-    const otherSheetName = 'Other';
+    const otherSheetName = OTHER_SHEET;
     
     if (!workbook.Sheets[otherSheetName]) {
       return res.json([]);
@@ -244,7 +282,7 @@ app.get('/api/barcode/lookup/:barcode', (req, res) => {
     }
 
     const workbook = XLSX.readFile(EXCEL_FILE);
-    const sheet1Name = 'Sheet1';
+    const sheet1Name = INVENTORY_SHEET;
     
     if (!workbook.Sheets[sheet1Name]) {
       console.error('❌ Sheet1 not found');
@@ -257,18 +295,22 @@ app.get('/api/barcode/lookup/:barcode', (req, res) => {
     const sheet1 = workbook.Sheets[sheet1Name];
     const sheet1Data = XLSX.utils.sheet_to_json(sheet1, { header: 1, defval: '' });
     
-    // Search for ASSET ID in Columns C, D, and E (index 2, 3, 4)
+    // Search for ASSET ID in configured columns
     for (let i = 0; i < sheet1Data.length; i++) {
       const row = sheet1Data[i];
-      const cellValueC = row[2];
-      const cellValueD = row[3];
-      const cellValueE = row[4];
       
-      const matchC = cellValueC !== undefined && cellValueC !== null && String(cellValueC).trim() === String(barcode).trim();
-      const matchD = cellValueD !== undefined && cellValueD !== null && String(cellValueD).trim() === String(barcode).trim();
-      const matchE = cellValueE !== undefined && cellValueE !== null && String(cellValueE).trim() === String(barcode).trim();
+      // Check all configured Asset ID columns
+      let assetFound = false;
+      for (const colIdx of ASSET_ID_COLS) {
+        const cellValue = row[colIdx];
+        const match = cellValue !== undefined && cellValue !== null && String(cellValue).trim() === String(barcode).trim();
+        if (match) {
+          assetFound = true;
+          break;
+        }
+      }
       
-      if (matchC || matchD || matchE) {
+      if (assetFound) {
         // Get Column G value (Asset Description) - index 6
         const columnG = row[6];
         const assetDescription = columnG ? String(columnG).trim() : '';
@@ -321,7 +363,19 @@ app.listen(PORT, () => {
   console.log('BARCODE SERVER STARTED');
   console.log('='.repeat(60));
   console.log(`Server running on: http://localhost:${PORT}`);
-  console.log(`Excel file location: ${EXCEL_FILE}`);
-  console.log(`Excel file exists: ${fs.existsSync(EXCEL_FILE)}`);
+  console.log(`Excel file: ${EXCEL_FILE}`);
+  console.log(`File exists: ${fs.existsSync(EXCEL_FILE)}`);
+  console.log('='.repeat(60));
+  console.log('CONFIGURATION:');
+  console.log(`  Inventory Sheet: ${INVENTORY_SHEET}`);
+  console.log(`  Other Sheet: ${OTHER_SHEET}`);
+  console.log(`  Asset ID Columns: ${ASSET_ID_COLS.join(', ')}`);
+  console.log(`  Asset Name Col: ${ASSET_NAME_COL}`);
+  console.log(`  Asset Desc Col: ${ASSET_DESC_COL}`);
+  console.log(`  Status Col: ${STATUS_COL}`);
+  console.log(`  Location Col: ${LOCATION_COL}`);
+  console.log(`  Room Col: ${ROOM_COL}`);
+  console.log(`  Marked Check Col: ${MARKED_CHECK_COL}`);
+  console.log(`  Count Range: Rows ${COUNT_START_ROW}-${COUNT_END_ROW} (${TOTAL_COUNT} items)`);
   console.log('='.repeat(60) + '\n');
 });
