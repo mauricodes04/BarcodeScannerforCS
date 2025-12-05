@@ -5,7 +5,7 @@ const XLSX = require('xlsx');
 
 const app = express();
 const PORT = 3000;
-const EXCEL_FILE = 'C:\\Users\\cutem\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\TEST_mauricio.xlsx'; //workstation cloud directory
+const EXCEL_FILE = 'C:\\Users\\cutem\\OneDrive\\Desktop\\OneDrive\\The University of Texas-Rio Grande Valley\\UTRGV_CS Student Workers - General\\DEMO.xlsx'; //workstation cloud directory
 
 app.use(express.json());
 
@@ -61,27 +61,27 @@ app.post('/api/barcode', (req, res) => {
       const matchE = cellValueE !== undefined && cellValueE !== null && String(cellValueE).trim() === String(data).trim();
       
       if (matchC || matchD || matchE) {
-        // Get Column G value (L) - index 6
-        const columnG = row[6];
+        // Get Column F value (L) - index 5
+        const columnG = row[5];
         const lValue = columnG ? String(columnG).trim() : '';
         
-        // Check if Column S (index 18) is empty
-        const columnS = row[18];
+        // Check if Column p (index 15) is empty
+        const columnS = row[15];
         
         if (!columnS || String(columnS).trim() === '') {
-          // Mark status in Column S
-          const cellAddressS = XLSX.utils.encode_cell({ r: i, c: 18 }); // Column S
+          // Mark status in Column p
+          const cellAddressS = XLSX.utils.encode_cell({ r: i, c: 15 }); // Column p
           sheet1[cellAddressS] = { t: 's', v: status || 'F' };
           
           // Write location abbreviation to Column T (index 19)
           if (location) {
-            const cellAddressT = XLSX.utils.encode_cell({ r: i, c: 19 }); // Column T
+            const cellAddressT = XLSX.utils.encode_cell({ r: i, c: 16 }); // Column T
             sheet1[cellAddressT] = { t: 's', v: location };
           }
           
           // Write room number to Column U (index 20)
           if (room) {
-            const cellAddressU = XLSX.utils.encode_cell({ r: i, c: 20 }); // Column U
+            const cellAddressU = XLSX.utils.encode_cell({ r: i, c: 17 }); // Column U
             sheet1[cellAddressU] = { t: 's', v: room };
           }
           
