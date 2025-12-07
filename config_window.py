@@ -35,7 +35,7 @@ class ConfigWindow(QMainWindow):
         file_group = QGroupBox("Excel File Selection")
         file_layout = QHBoxLayout()
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setText(r'C:\Users\cutem\OneDrive\Desktop\OneDrive\The University of Texas-Rio Grande Valley\UTRGV_CS Student Workers - General\DEMO.xlsx')
+        self.file_path_edit.setText(r'EXCEL SHEET')
         file_browse_btn = QPushButton("Browse...")
         file_browse_btn.clicked.connect(self.browse_file)
         file_layout.addWidget(QLabel("File Path:"))
@@ -137,7 +137,7 @@ class ConfigWindow(QMainWindow):
         ngrok_layout.addWidget(QLabel("ngrok Server URL:"))
         self.ngrok_url_edit = QLineEdit()
         self.ngrok_url_edit.setPlaceholderText("https://example.ngrok-free.dev/api")
-        self.ngrok_url_edit.setText("https://emilia-arteriovenous-tori.ngrok-free.dev/api")
+        self.ngrok_url_edit.setText("<PASTE_NGROK_ADDRESS_HERE>/api")
         ngrok_layout.addWidget(self.ngrok_url_edit)
         ngrok_group.setLayout(ngrok_layout)
         main_layout.addWidget(ngrok_group)
@@ -192,6 +192,9 @@ class ConfigWindow(QMainWindow):
         # Set default selections
         self.set_default_selections()
         
+        # Load existing config if it exists
+        self.load_existing_config()
+        
     def create_column_row(self, parent_layout, label_text):
         layout = QHBoxLayout()
         layout.addWidget(QLabel(label_text))
@@ -231,7 +234,10 @@ class ConfigWindow(QMainWindow):
         
     def letter_to_index(self, col_letter):
         """Convert column letter to zero-based index"""
-        if col_letter == "None":
+        if not col_letter or col_letter == "None":
+            return None
+        col_letter = col_letter.strip().upper()
+        if not col_letter:
             return None
         if len(col_letter) == 1:
             return ord(col_letter) - 65
@@ -248,6 +254,64 @@ class ConfigWindow(QMainWindow):
             first = (index - 26) // 26
             second = (index - 26) % 26
             return chr(65 + first) + chr(65 + second)
+    
+    def load_existing_config(self):
+        """Load existing config.json if it exists"""
+        config_path = os.path.join(os.path.dirname(__file__), "config.json")
+        if not os.path.exists(config_path):
+            return
+            
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                
+            # Load Excel file path
+            if "excel" in config and "filePath" in config["excel"]:
+                self.file_path_edit.setText(config["excel"]["filePath"])
+                
+            # Load column mappings
+            if "excel" in config and "columns" in config["excel"]:
+                cols = config["excel"]["columns"]
+                
+                # Asset ID columns
+                asset_ids = cols.get("assetIdSearch", [])
+                if len(asset_ids) > 0 and asset_ids[0] is not None:
+                    self.asset_id1_combo.setCurrentText(self.index_to_letter(asset_ids[0]))
+                if len(asset_ids) > 1 and asset_ids[1] is not None:
+                    self.asset_id2_combo.setCurrentText(self.index_to_letter(asset_ids[1]))
+                if len(asset_ids) > 2 and asset_ids[2] is not None:
+                    self.asset_id3_combo.setCurrentText(self.index_to_letter(asset_ids[2]))
+                    
+                # Other columns
+                if cols.get("assetName") is not None:
+                    self.asset_name_combo.setCurrentText(self.index_to_letter(cols["assetName"]))
+                if cols.get("assetDescription") is not None:
+                    self.asset_desc_combo.setCurrentText(self.index_to_letter(cols["assetDescription"]))
+                if cols.get("status") is not None:
+                    self.status_combo.setCurrentText(self.index_to_letter(cols["status"]))
+                if cols.get("location") is not None:
+                    self.location_combo.setCurrentText(self.index_to_letter(cols["location"]))
+                if cols.get("room") is not None:
+                    self.room_combo.setCurrentText(self.index_to_letter(cols["room"]))
+                if cols.get("markedCheck") is not None:
+                    self.marked_check_combo.setCurrentText(self.index_to_letter(cols["markedCheck"]))
+                    
+            # Load row range
+            if "excel" in config and "counting" in config["excel"]:
+                counting = config["excel"]["counting"]
+                if "startRow" in counting:
+                    self.start_row_spin.setValue(counting["startRow"])
+                if "endRow" in counting:
+                    self.end_row_spin.setValue(counting["endRow"])
+                    
+            # Load ngrok URL
+            if "server" in config and "ngrokUrl" in config["server"]:
+                self.ngrok_url_edit.setText(config["server"]["ngrokUrl"])
+                
+            self.validation_label.setText("✅ Loaded existing configuration")
+            
+        except Exception as e:
+            self.validation_label.setText(f"⚠️ Error loading config: {str(e)}")
             
     def browse_file(self):
         file_name, _ = QFileDialog.getOpenFileName(
@@ -554,33 +618,10 @@ class ConfigWindow(QMainWindow):
             with open(config_path, 'w') as f:
                 json.dump(config, f, indent=2)
                 
-            # Update database.js with ngrok URL
-            database_js_path = os.path.join(os.path.dirname(__file__), "services", "database.js")
-            try:
-                if os.path.exists(database_js_path):
-                    with open(database_js_path, 'r') as f:
-                        content = f.read()
-                        
-                    # Replace SERVER_URL
-                    import re
-                    new_content = re.sub(
-                        r"const SERVER_URL = '[^']*';",
-                        f"const SERVER_URL = '{self.ngrok_url_edit.text()}';",
-                        content
-                    )
-                    
-                    with open(database_js_path, 'w') as f:
-                        f.write(new_content)
-            except Exception as e:
-                QMessageBox.warning(self, "Warning", 
-                                   f"Configuration saved successfully to config.json\n\n"
-                                   f"However, couldn't update services/database.js:\n{str(e)}\n\n"
-                                   f"Please update SERVER_URL manually.")
-                return
-                
             QMessageBox.information(self, "Success", 
                                    "Configuration saved successfully!\n\n"
-                                   "Please restart server.js to apply changes.")
+                                   "The server URL will be automatically loaded from config.json.\n"
+                                   "Please restart the app to apply changes.")
             
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error saving configuration:\n{str(e)}")

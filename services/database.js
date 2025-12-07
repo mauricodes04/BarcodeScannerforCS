@@ -1,7 +1,8 @@
+import config from '../config.json';
 
-// Use your computer's IP address, not localhost, when using Expo tunnel
-// To find your IP: run 'ipconfig' in terminal and look for IPv4 Address
-const SERVER_URL = 'https://emilia-arteriovenous-tori.ngrok-free.dev/api';
+// Server URL is now configured in config.json
+// Update it using config_window.py or by editing config.json directly
+const SERVER_URL = config.server.ngrokUrl;
 
 // Lookup barcode to get asset information
 export const lookupBarcode = async (barcodeData) => {

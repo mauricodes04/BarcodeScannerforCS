@@ -14,13 +14,24 @@ Scan barcodes → Select status → Choose building → Enter room → Submit. D
   <img src="assets/5.png" width="200" alt="Success Alert" />
 </div>
 
+
 ## Setup
+
+Setup environment:
+
+```bash
+cd THIS_DIRECTORY
+conda create -n barcode-scanner python=3.11 pip -y
+conda activate barcode-scanner
+pip install -r requirements.txt
+```
 
 Each command on separate terminals:
 
 ```bash
-npm run server
 ngrok http 3000
-# Update database.js with URL provided by ngrok (add /api at the end)
+python config_window.py
+# make sure to add the excel sheet & ngrok url from the terminal running ngrok
+npm run server
 npx expo start --tunnel
 ```
